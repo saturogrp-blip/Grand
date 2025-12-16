@@ -1,0 +1,243 @@
+# Curator Management System - Quick Reference
+
+## ⚡ Quick Start (2 Minutes)
+
+### Step 1: Open Admin Panel
+```
+Open: admin.html
+Scroll to: "Curator Management" section
+```
+
+### Step 2: Select Organization
+```
+Dropdown → Choose organization (FIB, LSPD, etc.)
+List → Shows all current curators
+```
+
+### Step 3: Manage Curators
+```
+Add:    Enter name → Click "+ Add"
+Remove: Click "✕ Remove" next to curator name
+Senior: Edit top field → Click "Update"
+```
+
+### Step 4: Verify in Generator
+```
+Open: index.html
+Select: Same organization
+See:   Curators auto-populate!
+```
+
+---
+
+## 🔑 Key Commands
+
+### Admin Panel
+
+| Action | Steps | Result |
+|--------|-------|--------|
+| **Add Curator** | Type name → Click "+ Add" | Curator added to org |
+| **Remove Curator** | Click "✕ Remove" → Confirm | Curator deleted |
+| **Change Senior** | Type name → Click "Update" | Global senior updated |
+| **Export Data** | Click "Export Curators" | JSON downloads |
+| **Import Data** | Click "Import" → Select file | Curators restored |
+| **Reset All** | Click "Reset Curators" | Back to defaults |
+
+### JavaScript API
+
+```javascript
+// Get curators for organization
+CuratorDB.getCurators('FIB')
+
+// Add a curator
+CuratorDB.addCurator('LSPD', 'John Doe')
+
+// Remove a curator
+CuratorDB.removeCurator('SAHP', 'Lilith')
+
+// Update senior curator
+CuratorDB.setSeniorCurator('New Name')
+
+// Get senior curator
+CuratorDB.getSeniorCurator()
+
+// Export as JSON
+const json = CuratorDB.exportToJSON()
+
+// Import from JSON
+CuratorDB.importFromJSON(jsonString)
+
+// Get all data
+CuratorDB.getAllCurators()
+
+// Reset to defaults
+CuratorDB.resetToDefaults()
+
+// Get statistics
+CuratorDB.getStats()
+```
+
+---
+
+## 🎯 Common Workflows
+
+### Workflow: Update FIB Team
+```
+1. Open admin.html
+2. Select "FIB" from dropdown
+3. Click remove (✕) for each old curator
+4. Add new curators one by one
+5. Verify in question generator
+```
+
+### Workflow: Backup Data
+```
+1. Open admin.html
+2. Click "Export Curators"
+3. Save file with date: curators_2025-12-03.json
+4. Store safely (email, cloud, version control)
+```
+
+### Workflow: Restore from Backup
+```
+1. Open admin.html
+2. Click "Import Curators"
+3. Select backup JSON file
+4. Data restored automatically
+```
+
+### Workflow: Sync Multiple Browsers
+```
+Device A: Export curators
+Transfer: Email/USB/Cloud
+Device B: Import curators
+Both devices now have same data!
+```
+
+---
+
+## 📊 Data Structure
+
+```json
+{
+  "curators": {
+    "FIB": ["Sleazy", "Nikkie", "Moe"],
+    "LSPD": ["Donte", "Mahmut", "Saturo"],
+    "SAHP": ["Lilith", "Donte", "Nikkie"],
+    "GOV": ["Lilith", "Vanilla"],
+    "LI": ["Vanilla", "Markus", "Siven"],
+    "NG": ["James", "Mego"],
+    "EMS": ["James", "Mego", "Nikkie"]
+  },
+  "seniorCurator": "Zaid Pluxury",
+  "lastModified": "2025-12-03T10:30:00Z"
+}
+```
+
+---
+
+## ❓ Common Issues & Fixes
+
+| Issue | Solution |
+|-------|----------|
+| Curators not showing | Refresh page, check organization name |
+| Not syncing between tabs | Restart browser, check localStorage enabled |
+| Import failing | Validate JSON with jsonlint.com |
+| Changes disappeared | Use backup JSON to restore |
+| Test failures | Check console (F12) for errors |
+
+---
+
+## 🧪 Test System
+
+### Run Tests
+```
+1. Open CURATOR_TEST.html
+2. Click "▶ Run All Tests"
+3. View results (green = pass, red = fail)
+4. Check summary at bottom
+```
+
+### Expected Results
+```
+✓ 11 tests total
+✓ All should pass
+✓ Summary shows: "All tests passed! ✓"
+```
+
+---
+
+## 📁 Files Overview
+
+| File | Purpose | Edit? |
+|------|---------|-------|
+| `curator-db.js` | Core database | No (unless extending) |
+| `admin.html` | Admin interface | Yes (UI only) |
+| `index.html` | Question generator | No (already updated) |
+| `CURATOR_TEST.html` | Testing | No (view-only) |
+| `curator.js` | Legacy fallback | No (keep as-is) |
+
+---
+
+## ⚙️ Configuration
+
+### Default Curators
+```javascript
+FIB:  Sleazy, Nikkie, Moe, Onur, Saturo
+LSPD: Donte, Mahmut, Saturo
+SAHP: Lilith, Donte, Nikkie, Trashley
+GOV:  Lilith, Vanilla
+LI:   Vanilla, Markus, Siven
+NG:   James, Mego
+EMS:  James, Mego, Nikkie
+```
+
+### Default Senior Curator
+```
+Zaid Pluxury
+```
+
+### Storage Key
+```
+curators_database_v2  (in localStorage)
+```
+
+---
+
+## 🔒 Important Notes
+
+✓ **Data is LOCAL** - Stored only in browser, not on server  
+✓ **AUTO-SAVE** - Changes saved immediately  
+✓ **SYNCED** - Works across tabs in real-time  
+✓ **PERSISTENT** - Survives page refresh  
+✓ **BACKED UP** - Use export for permanent storage  
+
+---
+
+## 📞 Help Resources
+
+- **Setup Guide**: `CURATOR_SETUP_GUIDE.md`
+- **Technical Docs**: `CURATOR_MANAGEMENT.md`
+- **Implementation**: `CURATOR_IMPLEMENTATION.md`
+- **Tests**: `CURATOR_TEST.html`
+
+---
+
+## ✅ Checklist
+
+- [ ] Opened admin.html
+- [ ] Located Curator Management section
+- [ ] Selected an organization
+- [ ] Added/removed curators
+- [ ] Updated senior curator
+- [ ] Opened index.html in another tab
+- [ ] Verified auto-population works
+- [ ] Tested export/import
+- [ ] Ran tests and all passed
+- [ ] Bookmarked this reference
+
+---
+
+**🎉 You're all set! Everything is ready to use.**
+
+For detailed information, see the full documentation files.

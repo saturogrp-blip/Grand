@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curator Database Test Suite</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: #f5f5f5;
+        }
+        h1 { color: #333; border-bottom: 3px solid #0b66c2; padding-bottom: 1rem; }
+        .test-group { background: white; padding: 1.5rem; margin: 1.5rem 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .test-case {
+            padding: 1rem;
+            margin: 0.8rem 0;
+            border-left: 4px solid #ccc;
+            border-radius: 4px;
+            background: #f9f9f9;
+        }
+        .test-case.pass {
+            border-left-color: #22c55e;
+            background: #f0fdf4;
+        }
+        .test-case.fail {
+            border-left-color: #dc3545;
+            background: #fef2f2;
+        }
+        .test-name { font-weight: 600; color: #333; }
+        .test-result { font-size: 0.9rem; margin-top: 0.3rem; }
+        .pass { color: #15803d; }
+        .fail { color: #991b1b; }
+        .info { color: #0369a1; font-size: 0.9rem; margin-top: 0.3rem; }
+        button {
+            padding: 0.6rem 1.2rem;
+            background: #0b66c2;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all .2s;
+        }
+        button:hover { background: #0956a0; }
+        .summary {
+            padding: 1.5rem;
+            border-radius: 8px;
+            background: white;
+            margin-top: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .summary h2 { margin-top: 0; }
+        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1rem 0; }
+        .stat-item { padding: 1rem; background: #f9f9f9; border-radius: 6px; text-align: center; }
+        .stat-value { font-size: 2rem; font-weight: bold; color: #0b66c2; }
+        .stat-label { font-size: 0.9rem; color: #666; margin-top: 0.5rem; }
+        code {
+            background: #f0f0f0;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Curator Database Test Suite</h1>
+    <p>Comprehensive testing of the CuratorDB system functionality</p>
+
+    <div class="test-group">
+        <h2>Test Controls</h2>
+        <button onclick="runAllTests()">▶ Run All Tests</button>
+        <button onclick="clearTestResults()">🗑 Clear Results</button>
+        <button onclick="viewStorageData()">📊 View Storage Data</button>
+        <button onclick="resetDatabase()">↺ Reset Database</button>
+    </div>
+
+    <div id="results"></div>
+
+    <div class="summary" id="summary" style="display:none;">
+        <h2>📈 Test Summary</h2>
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="totalTests">0</div>
+                <div class="stat-label">Total Tests</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value pass" id="passedTests">0</div>
+                <div class="stat-label">Passed</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value fail" id="failedTests">0</div>
+                <div class="stat-label">Failed</div>
+            </div>
+        </div>
+        <p id="summaryText"></p>
+    </div>
+
+    <script src="curator-db.js"></script>
+    <script>
+        const resultsDiv = document.getElementById('results');
+        let testResults = [];
+
+        function log(testName, passed, details = '') {
+            testResults.push({ name: testName, passed, details });
+            const div = document.createElement('div');
+            div.className = `test-case ${passed ? 'pass' : 'fail'}`;
+            div.innerHTML = `
+                <div class="test-name">${passed ? '✓' : '✗'} ${testName}</div>
+                ${details ? `<div class="test-result ${passed ? 'pass' : 'fail'}">${details}</div>` : ''}
+            `;
+            resultsDiv.appendChild(div);
+        }
+
+        function info(message) {
+            const div = document.createElement('div');
+            div.className = 'test-case';
+            div.innerHTML = `<div class="info">ℹ ${message}</div>`;
+            resultsDiv.appendChild(div);
+        }
+
+        function runAllTests() {
+            clearTestResults();
+            info('Starting comprehensive Curator Database tests...');
+
+            testDatabaseInitialization();
+            testAddCurator();
+            testRemoveCurator();
+            testGetCurators();
+            testSetCurators();
+            testSeniorCurator();
+            testExportImport();
+            testDuplicatePrevention();
+            testReset();
+            testStats();
+            testEventEmission();
+
+            updateSummary();
+        }
+
+        function testDatabaseInitialization() {
+            try {
+                const data = window.CuratorDB.getData();
+                const hasOrgFIB = data.curators && data.curators.FIB && Array.isArray(data.curators.FIB);
+                const hasSenior = data.seniorCurator && typeof data.seniorCurator === 'string';
+                log('Database Initialization', hasOrgFIB && hasSenior, 
+                    `Loaded ${Object.keys(data.curators).length} organizations with ${data.seniorCurator || 'unknown'} as senior curator`);
+            } catch (e) {
+                log('Database Initialization', false, `Error: ${e.message}`);
+            }
+        }
+
+        function testAddCurator() {
+            try {
+                const org = 'FIB';
+                const testName = 'Test_Curator_' + Date.now();
+                const result = window.CuratorDB.addCurator(org, testName);
+                const curators = window.CuratorDB.getCurators(org);
+                const exists = curators.includes(testName);
+                log('Add Curator', result && exists, `Added "${testName}" to ${org}: ${exists}`);
+                // Cleanup
+                window.CuratorDB.removeCurator(org, testName);
+            } catch (e) {
+                log('Add Curator', false, `Error: ${e.message}`);
+            }
+        }
+
+        function testRemoveCurator() {
+            try {
+                const org = 'LSPD';
+                const testName = 'Test_Remove_' + Date.now();
+                window.CuratorDB.addCurator(org, testName);
+                const result = window.CuratorDB.removeCurator(org, testName);
+                const curators = window.CuratorDB.getCurators(org);
+                const notExists = !curators.includes(testName);
+                log('Remove Curator', result && notExists, `Removed "${testName}" from ${org}`);
+            } catch (e) {
+                log('Remove Curator', false, `Error: ${e.message}`);
+            }
+        }
+
+        function testGetCurators() {
+            try {
+                const curators = window.CuratorDB.getCurators('FIB');
+                const isArray = Array.isArray(curators);
+                const hasElements = curators.length > 0;
+                log('Get Curators', isArray && hasElements, 
+                    `Retrieved ${curators.length} curators for FIB: ${curators.slice(0, 3).join(', ')}...`);
+            } catch (e) {
+                log('Get Curators', false, `Error: ${e.message}`);
+            }
+        }
+
+        function testSetCurators() {
+            try {
+                const org = 'NG';
+                const testList = ['Curator1', 'Curator2', 'Curator3'];
+                const result = window.CuratorDB.setCurators(org, testList);
+                const curators = window.CuratorDB.getCurators(org);
+                const matches = JSON.stringify(testList) === JSON.stringify(curators);
+                log('Set Curators (Batch)', result && matches, `Set ${testList.length} curators for ${org}`);
+                // Reset
+                window.CuratorDB.resetToDefaults();
+            } catch (e) {
+                log('Set Curators (Batch)', false, `Error: ${e.message}`);
+            }
+        }
+
+        function testSeniorCurator() {
+            try {
+                const testSenior = 'Test_Senior_' + Date.now();
+                const setResult = window.CuratorDB.setSeniorCurator(testSenior);
+                const getSenior = window.CuratorDB.getSeniorCurator();
+                const matches = getSenior === testSenior;
+                log('Senior Curator Management', setResult && matches, 
+                    `Set and retrieved senior curator: "${getSenior}"`);
+                // Reset
+                window.CuratorDB.setSeniorCurator('Zaid Pluxury');
+            } catch (e) {
+                log('Senior Curator Management', false, `Error: ${e.message}`);
+            }
+        }
+
+        function testExportImport() {
+            try {
+                const originalData = window.CuratorDB.getAllCurators();
+                const exported = window.CuratorDB.exportToJSON();
+                const isValidJSON = JSON.parse(exported);
+                const importResult = window.CuratorDB.importFromJSON(exported);
+                const reimported = window.CuratorDB.getAllCurators();
+                const matches = JSON.stringify(originalData) === JSON.stringify(reimported);
+                log('Export/Import', isValidJSON && importResult && matches, 
+                    `Successfully exported, imported, and verified curator data`);
+            } catch (e) {
+                log('Export/Import', false, `Error: ${e.message}`);
+            }
+        }
+
+        function testDuplicatePrevention() {
+            try {
+                const org = 'EMS';
+                const testName = 'DupTest_' + Date.now();
+                window.CuratorDB.addCurator(org, testName);
+                const firstAdd = window.CuratorDB.getCurators(org).filter(c => c === testName).length;
+                const secondAddResult = window.CuratorDB.addCurator(org, testName); // Should fail
+                const afterDup = window.CuratorDB.getCurators(org).filter(c => c === testName).length;
+                log('Duplicate Prevention', !secondAddResult && firstAdd === afterDup, 
+                    `Prevented duplicate entry of "${testName}"`);
+                // Cleanup
+                window.CuratorDB.removeCurator(org, testName);
+            } catch (e) {
+                log('Duplicate Prevention', false, `Error: ${e.message}`);
+            }
+        }
+
+        function testReset() {
+            try {
+                const testName = 'TempCurator_' + Date.now();
+                window.CuratorDB.addCurator('GOV', testName);
+                let hasTemp = window.CuratorDB.getCurators('GOV').includes(testName);
+                const resetResult = window.CuratorDB.resetToDefaults();
+                const afterReset = window.CuratorDB.getCurators('GOV');
+                const noTemp = !afterReset.includes(testName);
+                log('Reset to Defaults', resetResult && hasTemp && noTemp, 
+                    `Reset database to defaults and removed temporary data`);
+            } catch (e) {
+                log('Reset to Defaults', false, `Error: ${e.message}`);
+            }
+        }
+
+        function testStats() {
+            try {
+                const stats = window.CuratorDB.getStats();
+                const hasTotal = typeof stats.totalCurators === 'number' && stats.totalCurators > 0;
+                const hasPerOrg = stats.perOrg && Object.keys(stats.perOrg).length > 0;
+                const hasSenior = stats.seniorCurator && typeof stats.seniorCurator === 'string';
+                log('Statistics', hasTotal && hasPerOrg && hasSenior, 
+                    `Total: ${stats.totalCurators} curators across ${Object.keys(stats.perOrg).length} organizations`);
+            } catch (e) {
+                log('Statistics', false, `Error: ${e.message}`);
+            }
+        }
+
+        function testEventEmission() {
+            try {
+                let eventFired = false;
+                window.addEventListener('curatorDbChanged', () => { eventFired = true; });
+                window.CuratorDB.setSeniorCurator('Event Test');
+                log('Event Emission', eventFired, 'Custom curatorDbChanged event was fired on data change');
+                // Reset
+                window.CuratorDB.setSeniorCurator('Zaid Pluxury');
+            } catch (e) {
+                log('Event Emission', false, `Error: ${e.message}`);
+            }
+        }
+
+        function updateSummary() {
+            const total = testResults.length;
+            const passed = testResults.filter(r => r.passed).length;
+            const failed = total - passed;
+            
+            document.getElementById('totalTests').textContent = total;
+            document.getElementById('passedTests').textContent = passed;
+            document.getElementById('failedTests').textContent = failed;
+            document.getElementById('summaryText').textContent = 
+                `${passed} out of ${total} tests passed. ${failed > 0 ? `${failed} test(s) failed.` : 'All tests passed! ✓'}`;
+            document.getElementById('summary').style.display = 'block';
+        }
+
+        function clearTestResults() {
+            resultsDiv.innerHTML = '';
+            testResults = [];
+            document.getElementById('summary').style.display = 'none';
+        }
+
+        function viewStorageData() {
+            try {
+                const data = window.CuratorDB.getData();
+                alert('Storage Data:\n\n' + JSON.stringify(data, null, 2));
+            } catch (e) {
+                alert('Error viewing storage: ' + e.message);
+            }
+        }
+
+        function resetDatabase() {
+            if (confirm('Reset database to defaults? This cannot be undone without importing a backup.')) {
+                window.CuratorDB.resetToDefaults();
+                alert('Database reset to defaults!');
+            }
+        }
+
+        // Auto-run tests on load
+        window.addEventListener('load', () => {
+            info('Curator Database ready. Click "Run All Tests" to start testing.');
+        });
+    </script>
+</body>
+</html>

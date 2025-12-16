@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Data Editor - Grand Interview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            height: 90vh;
+        }
+
+        .header {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4ade80;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .panel {
+            overflow-y: auto;
+            padding: 30px;
+            border-right: 1px solid #e5e7eb;
+        }
+
+        .panel:last-child {
+            border-right: none;
+        }
+
+        .panel h2 {
+            font-size: 22px;
+            margin-bottom: 20px;
+            color: #333;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .curator-list {
+            margin-top: 20px;
+        }
+
+        .curator-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s;
+        }
+
+        .curator-item:hover {
+            background: #f0f0f0;
+            transform: translateX(5px);
+        }
+
+        .curator-info {
+            flex: 1;
+        }
+
+        .curator-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .curator-meta {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .curator-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .json-editor {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 15px;
+            border: 1px solid #444;
+        }
+
+        .json-editor textarea {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border: none;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            width: 100%;
+            height: 300px;
+            resize: vertical;
+        }
+
+        .stats {
+            background: #f0f7ff;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 14px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: #666;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .alert {
+            padding: 12px 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #7f1d1d;
+            border-left: 4px solid #ef4444;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border-left: 4px solid #3b82f6;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            .panel {
+                border-right: none;
+                border-bottom: 1px solid #e5e7eb;
+            }
+
+            .panel:last-child {
+                border-bottom: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚡ Real-Time Data Editor</h1>
+            <div class="header-controls">
+                <div class="status">
+                    <div class="status-dot"></div>
+                    <span id="statusText">Live</span>
+                </div>
+                <button class="btn-secondary" onclick="setTab('curators')">👥 Curators</button>
+                <button class="btn-secondary" onclick="setTab('questions')">❓ Questions</button>
+                <button class="btn-secondary" onclick="refreshData()">🔄 Refresh</button>
+                <button class="btn-secondary" onclick="downloadBackup()">📥 Backup</button>
+                <button class="btn-primary" onclick="showImportDialog()">📤 Restore</button>
+                <input type="file" id="importFile" accept=".json" hidden>
+            </div>
+        </div>
+
+        <!-- Left Panel: Curator/Questions Management -->
+        <div class="panel">
+            <!-- Curators Tab -->
+            <div id="curatorTab" class="tab-content" style="display: block;">
+                <h2>👥 Curator Manager</h2>
+                
+                <div id="alerts"></div>
+
+                <div class="form-group">
+                    <label for="orgSelect">Select Organization:</label>
+                    <select id="orgSelect" onchange="loadCurators()">
+                        <option value="">-- Choose Organization --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="curatorName">Curator Name:</label>
+                    <input type="text" id="curatorName" placeholder="Enter curator name">
+                </div>
+
+                <div class="form-group">
+                    <button class="btn-success" onclick="addCurator()" style="width: 100%;">+ Add Curator</button>
+                </div>
+
+                <div id="curatorList" class="curator-list"></div>
+
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Total Curators:</span>
+                        <span class="stat-value" id="statCurators">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Storage Used:</span>
+                        <span class="stat-value" id="statStorage">0 KB</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Last Updated:</span>
+                        <span class="stat-value" id="statTime">--:--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Questions Tab -->
+            <div id="questionsTab" class="tab-content" style="display: none;">
+                <h2>❓ Question Manager</h2>
+                
+                <div id="questionAlerts"></div>
+
+                <div class="form-group">
+                    <label for="questionOrg">Select Organization:</label>
+                    <select id="questionOrg" onchange="loadQuestions()">
+                        <option value="">-- All Organizations --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="questionTitle">Question Title:</label>
+                    <input type="text" id="questionTitle" placeholder="Enter question title">
+                </div>
+
+                <div class="form-group">
+                    <label for="questionContent">Question Content:</label>
+                    <textarea id="questionContent" placeholder="Enter question content" style="height: 100px;"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <button class="btn-success" onclick="addQuestion()" style="width: 100%;">+ Add Question</button>
+                </div>
+
+                <div id="questionList" class="curator-list"></div>
+
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Total Questions:</span>
+                        <span class="stat-value" id="statQuestions">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Storage Used:</span>
+                        <span class="stat-value" id="statQuestionStorage">0 KB</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Last Updated:</span>
+                        <span class="stat-value" id="statQuestionTime">--:--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel: JSON Editor & System Info -->
+        <div class="panel">
+            <h2>📋 Data Viewer</h2>
+            
+            <div class="form-group">
+                <label for="dataView">View/Edit JSON Data:</label>
+                <div class="json-editor">
+                    <textarea id="jsonData" readonly></textarea>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px; display: flex; gap: 10px;">
+                <button class="btn-secondary" onclick="copyToClipboard()" style="flex: 1;">📋 Copy JSON</button>
+                <button class="btn-secondary" onclick="refreshData()" style="flex: 1;">🔄 Reload</button>
+                <button class="btn-danger" onclick="clearAllData()" style="flex: 1;">🗑️ Clear All</button>
+            </div>
+
+            <div class="stats" style="margin-top: 20px;">
+                <div class="stat-item">
+                    <span class="stat-label">System Status:</span>
+                    <span class="stat-value">✅ Active</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Total Curators:</span>
+                    <span class="stat-value" id="statCuratorCount">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Total Questions:</span>
+                    <span class="stat-value" id="statQuestionCount">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Auto-Save:</span>
+                    <span class="stat-value">Enabled</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Storage Type:</span>
+                    <span class="stat-value">LocalStorage</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="data-storage.js"></script>
+    <script>
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            populateOrganizations();
+            populateQuestionOrganizations();
+            loadCurators();
+            updateStats();
+            refreshJsonView();
+            
+            // Update stats every 5 seconds
+            setInterval(updateStats, 5000);
+            
+            // Watch for changes
+            dataStorage.watch('all', () => {
+                loadCurators();
+                loadQuestions();
+                refreshJsonView();
+                updateStats();
+                showAlert('💾 Data updated in real-time!', 'info');
+            });
+        });
+
+        function populateOrganizations() {
+            const orgSelect = document.getElementById('orgSelect');
+            const data = dataStorage.getAllData();
+            
+            Object.keys(data.organizations).forEach(org => {
+                const option = document.createElement('option');
+                option.value = org;
+                option.textContent = org;
+                orgSelect.appendChild(option);
+            });
+        }
+
+        function loadCurators() {
+            const orgSelect = document.getElementById('orgSelect');
+            const org = orgSelect.value;
+            const curatorList = document.getElementById('curatorList');
+            
+            if (!org) {
+                curatorList.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div>Select an organization</div>';
+                return;
+            }
+
+            const curators = dataStorage.getCuratorsByOrg(org);
+            
+            if (curators.length === 0) {
+                curatorList.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🤷</div>No curators yet</div>';
+                return;
+            }
+
+            curatorList.innerHTML = curators.map(curator => `
+                <div class="curator-item">
+                    <div class="curator-info">
+                        <div class="curator-name">${curator.name}</div>
+                        <div class="curator-meta">Added: ${new Date(curator.createdAt).toLocaleDateString()}</div>
+                    </div>
+                    <div class="curator-actions">
+                        <button class="btn-secondary btn-small" onclick="editCurator('${curator.id}')">✏️ Edit</button>
+                        <button class="btn-danger btn-small" onclick="deleteCurator('${curator.id}')">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addCurator() {
+            const orgSelect = document.getElementById('orgSelect');
+            const curatorName = document.getElementById('curatorName');
+            
+            const org = orgSelect.value;
+            const name = curatorName.value.trim();
+            
+            if (!org || !name) {
+                showAlert('Please select organization and enter curator name', 'error');
+                return;
+            }
+
+            dataStorage.addCurator(org, name);
+            curatorName.value = '';
+            loadCurators();
+            showAlert(`✅ Curator "${name}" added successfully!`, 'success');
+        }
+
+        function editCurator(curatorId) {
+            const newName = prompt('Enter new curator name:');
+            if (newName && newName.trim()) {
+                dataStorage.updateCurator(curatorId, { name: newName.trim() });
+                loadCurators();
+                showAlert('✅ Curator updated!', 'success');
+            }
+        }
+
+        function deleteCurator(curatorId) {
+            if (confirm('Are you sure you want to delete this curator?')) {
+                dataStorage.removeCurator(curatorId);
+                loadCurators();
+                showAlert('🗑️ Curator deleted', 'success');
+            }
+        }
+
+        function refreshJsonView() {
+            const data = dataStorage.getAllData();
+            const jsonData = document.getElementById('jsonData');
+            jsonData.value = JSON.stringify(data, null, 2);
+        }
+
+        function refreshData() {
+            loadCurators();
+            refreshJsonView();
+            updateStats();
+            showAlert('🔄 Data refreshed!', 'info');
+        }
+
+        function updateStats() {
+            const stats = dataStorage.getStats();
+            document.getElementById('statCurators').textContent = stats.totalCurators;
+            document.getElementById('statStorage').textContent = (stats.storageUsed / 1024).toFixed(1) + ' KB';
+            document.getElementById('statCuratorCount').textContent = stats.totalCurators;
+            document.getElementById('statQuestionCount').textContent = stats.totalQuestions || 0;
+            
+            const lastMod = new Date(stats.lastModified);
+            document.getElementById('statTime').textContent = lastMod.toLocaleTimeString();
+        }
+
+        function copyToClipboard() {
+            const jsonData = document.getElementById('jsonData');
+            jsonData.select();
+            document.execCommand('copy');
+            showAlert('📋 JSON copied to clipboard!', 'success');
+        }
+
+        function downloadBackup() {
+            dataStorage.exportData();
+            showAlert('📥 Backup downloaded!', 'success');
+        }
+
+        function showImportDialog() {
+            document.getElementById('importFile').click();
+        }
+
+        document.getElementById('importFile').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            try {
+                await dataStorage.importData(file);
+                loadCurators();
+                refreshJsonView();
+                updateStats();
+                showAlert('📤 Data restored successfully!', 'success');
+            } catch (error) {
+                showAlert('Error importing data: ' + error.message, 'error');
+            }
+        });
+
+        function clearAllData() {
+            if (confirm('⚠️ Are you sure? This will delete ALL curator data permanently!')) {
+                if (confirm('Last chance! Click OK to confirm deletion.')) {
+                    dataStorage.clearAllData();
+                    loadCurators();
+                    refreshJsonView();
+                    updateStats();
+                    showAlert('🗑️ All data cleared!', 'error');
+                }
+            }
+        }
+
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alerts');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.innerHTML = `
+                <span>${message}</span>
+                <button style="background: none; border: none; color: inherit; cursor: pointer; font-size: 18px;" onclick="this.parentElement.remove()">×</button>
+            `;
+            alertContainer.appendChild(alert);
+
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+
+        // Tab switching
+        function setTab(tabName) {
+            // Hide all tabs
+            document.getElementById('curatorTab').style.display = 'none';
+            document.getElementById('questionsTab').style.display = 'none';
+            
+            // Show selected tab
+            if (tabName === 'curators') {
+                document.getElementById('curatorTab').style.display = 'block';
+                loadCurators();
+            } else if (tabName === 'questions') {
+                document.getElementById('questionsTab').style.display = 'block';
+                populateQuestionOrganizations();
+                loadQuestions();
+            }
+        }
+
+        // Question Management Functions
+        function populateQuestionOrganizations() {
+            const data = dataStorage.getAllData();
+            const select = document.getElementById('questionOrg');
+            
+            // Keep the first option
+            const currentValue = select.value;
+            select.innerHTML = '<option value="">-- All Organizations --</option>';
+            
+            Object.values(data.organizations).forEach(org => {
+                const option = document.createElement('option');
+                option.value = org.name;
+                option.textContent = org.name;
+                select.appendChild(option);
+            });
+            
+            select.value = currentValue;
+        }
+
+        function loadQuestions() {
+            const questionList = document.getElementById('questionList');
+            const org = document.getElementById('questionOrg').value;
+            
+            let questions = [];
+            if (org) {
+                questions = dataStorage.getQuestionsByOrg(org);
+            } else {
+                questions = Object.values(dataStorage.getAllQuestions())
+                    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+            }
+            
+            questionList.innerHTML = '';
+            
+            if (questions.length === 0) {
+                questionList.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">No questions found</div>';
+                return;
+            }
+            
+            questions.forEach(question => {
+                const item = document.createElement('div');
+                item.className = 'curator-item';
+                item.innerHTML = `
+                    <div class="curator-info">
+                        <div class="curator-name">${question.title}</div>
+                        <div class="curator-meta">${question.content.substring(0, 50)}...</div>
+                        <div class="curator-meta">Organization: ${question.organization || 'General'}</div>
+                        <div class="curator-meta">Updated: ${new Date(question.updatedAt).toLocaleString()}</div>
+                    </div>
+                    <div class="curator-actions">
+                        <button class="btn-small btn-secondary" onclick="editQuestion('${question.id}')">✏️ Edit</button>
+                        <button class="btn-small btn-danger" onclick="deleteQuestion('${question.id}')">🗑️ Delete</button>
+                    </div>
+                `;
+                questionList.appendChild(item);
+            });
+            
+            updateQuestionStats();
+        }
+
+        function addQuestion() {
+            const org = document.getElementById('questionOrg').value || '';
+            const title = document.getElementById('questionTitle').value.trim();
+            const content = document.getElementById('questionContent').value.trim();
+            
+            if (!title || !content) {
+                showQuestionAlert('Please enter question title and content', 'error');
+                return;
+            }
+
+            dataStorage.addQuestion(title, content, org);
+            document.getElementById('questionTitle').value = '';
+            document.getElementById('questionContent').value = '';
+            loadQuestions();
+            showQuestionAlert(`✅ Question "${title}" added successfully!`, 'success');
+        }
+
+        function editQuestion(questionId) {
+            const question = dataStorage.getQuestion(questionId);
+            if (!question) return;
+
+            const newTitle = prompt('Edit question title:', question.title);
+            if (newTitle === null) return;
+
+            const newContent = prompt('Edit question content:', question.content);
+            if (newContent === null) return;
+
+            if (newTitle.trim() && newContent.trim()) {
+                dataStorage.updateQuestion(questionId, { 
+                    title: newTitle.trim(),
+                    content: newContent.trim()
+                });
+                loadQuestions();
+                showQuestionAlert('✅ Question updated!', 'success');
+            }
+        }
+
+        function deleteQuestion(questionId) {
+            if (confirm('Are you sure you want to delete this question?')) {
+                dataStorage.removeQuestion(questionId);
+                loadQuestions();
+                showQuestionAlert('🗑️ Question deleted', 'success');
+            }
+        }
+
+        function updateQuestionStats() {
+            const stats = dataStorage.getStats();
+            document.getElementById('statQuestions').textContent = stats.totalQuestions || 0;
+            document.getElementById('statQuestionStorage').textContent = (stats.storageUsed / 1024).toFixed(1) + ' KB';
+            
+            const lastMod = new Date(stats.lastModified);
+            document.getElementById('statQuestionTime').textContent = lastMod.toLocaleTimeString();
+        }
+
+        function showQuestionAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('questionAlerts');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.innerHTML = `
+                <span>${message}</span>
+                <button style="background: none; border: none; color: inherit; cursor: pointer; font-size: 18px;" onclick="this.parentElement.remove()">×</button>
+            `;
+            alertContainer.appendChild(alert);
+
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

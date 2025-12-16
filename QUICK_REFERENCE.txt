@@ -1,0 +1,411 @@
+# ⚡ Real-Time Data Storage - Quick Reference Card
+
+## 🚀 Start (1 Minute)
+
+```bash
+# Option A: Auto Setup (Windows)
+setup.bat
+
+# Option B: Manual
+npm install
+node backend-data.js
+
+# Then open:
+http://localhost:3000/data-editor.html
+```
+
+---
+
+## 📝 JavaScript API (Copy & Paste)
+
+### Add Curator
+```javascript
+dataStorage.addCurator('EMS', 'John Doe', { role: 'lead' });
+```
+
+### Get Curators
+```javascript
+const curators = dataStorage.getCuratorsByOrg('EMS');
+console.log(curators); // Array of curator objects
+```
+
+### Update Curator
+```javascript
+dataStorage.updateCurator('EMS_123456', { name: 'Jane Doe' });
+```
+
+### Remove Curator
+```javascript
+dataStorage.removeCurator('EMS_123456');
+```
+
+### Watch for Changes
+```javascript
+const unwatch = dataStorage.watch('curators', (data) => {
+    console.log('Data changed!', data);
+});
+```
+
+### Get All Data
+```javascript
+const allData = dataStorage.getAllData();
+console.log(allData); // Complete database
+```
+
+### Export Backup
+```javascript
+dataStorage.exportData(); // Downloads JSON file
+```
+
+### Import Backup
+```javascript
+const file = document.getElementById('fileInput').files[0];
+dataStorage.importData(file);
+```
+
+### Get Stats
+```javascript
+const stats = dataStorage.getStats();
+console.log(stats.totalCurators); // Number
+console.log(stats.storageUsed);    // Bytes
+console.log(stats.lastModified);   // ISO timestamp
+```
+
+---
+
+## 🔌 REST API (Copy & Paste)
+
+### Get All Data
+```bash
+curl http://localhost:3001/api/data
+```
+
+### Get Organization Curators
+```bash
+curl http://localhost:3001/api/curators/EMS
+```
+
+### Add Curator
+```bash
+curl -X POST http://localhost:3001/api/curators \
+  -H "Content-Type: application/json" \
+  -d '{"org":"EMS","name":"John Doe","metadata":{}}'
+```
+
+### Save Data
+```bash
+curl -X POST http://localhost:3001/api/data/save \
+  -H "Content-Type: application/json" \
+  -d @data.json
+```
+
+### Delete Curator
+```bash
+curl -X DELETE http://localhost:3001/api/curators/EMS_123456
+```
+
+### Get Backups
+```bash
+curl http://localhost:3001/api/backups
+```
+
+### Health Check
+```bash
+curl http://localhost:3001/api/health
+```
+
+---
+
+## 🎯 Common Tasks
+
+### Task: Load Curators in Dropdown
+```javascript
+<select id="curatorSelect">
+    <option>Select...</option>
+</select>
+
+<script src="data-storage.js"></script>
+<script>
+    const org = 'EMS';
+    const curators = dataStorage.getCuratorsByOrg(org);
+    const select = document.getElementById('curatorSelect');
+    
+    curators.forEach(curator => {
+        const option = document.createElement('option');
+        option.value = curator.id;
+        option.textContent = curator.name;
+        select.appendChild(option);
+    });
+</script>
+```
+
+### Task: Real-Time Update List
+```javascript
+<div id="curatorList"></div>
+
+<script src="data-storage.js"></script>
+<script>
+    function renderList(org) {
+        const curators = dataStorage.getCuratorsByOrg(org);
+        const html = curators
+            .map(c => `<li>${c.name} (${c.organization})</li>`)
+            .join('');
+        document.getElementById('curatorList').innerHTML = 
+            `<ul>${html}</ul>`;
+    }
+    
+    // Initial render
+    renderList('EMS');
+    
+    // Re-render on changes
+    dataStorage.watch('curators', () => renderList('EMS'));
+</script>
+```
+
+### Task: Form with Auto-Save
+```html
+<form id="curatorForm">
+    <input type="text" id="name" placeholder="Curator name">
+    <select id="org">
+        <option value="EMS">EMS</option>
+        <option value="FIB">FIB</option>
+        <option value="LSPD">LSPD</option>
+    </select>
+    <button type="submit">Add</button>
+</form>
+
+<script src="data-storage.js"></script>
+<script>
+    document.getElementById('curatorForm').onsubmit = (e) => {
+        e.preventDefault();
+        const name = document.getElementById('name').value;
+        const org = document.getElementById('org').value;
+        
+        dataStorage.addCurator(org, name);
+        document.getElementById('curatorForm').reset();
+    };
+</script>
+```
+
+---
+
+## 📊 Data Structure
+
+```json
+{
+  "curators": {
+    "EMS_1701705600000": {
+      "id": "EMS_1701705600000",
+      "name": "John Doe",
+      "organization": "EMS",
+      "createdAt": "2024-12-04T10:00:00.000Z"
+    }
+  },
+  "organizations": {
+    "EMS": {"name": "EMS", "curators": ["EMS_1701705600000"]},
+    "FIB": {"name": "FIB", "curators": []},
+    "GOV": {"name": "GOV", "curators": []},
+    "LI": {"name": "LI", "curators": []},
+    "LSPD": {"name": "LSPD", "curators": []},
+    "NG": {"name": "NG", "curators": []},
+    "SAHP": {"name": "SAHP", "curators": []}
+  },
+  "questions": {},
+  "metadata": {
+    "version": "1.0.0",
+    "createdAt": "2024-12-04T...",
+    "lastModified": "2024-12-04T..."
+  }
+}
+```
+
+---
+
+## 📁 Files & Locations
+
+| File | Purpose | Type |
+|------|---------|------|
+| `data-storage.js` | Core engine | JavaScript |
+| `data-editor.html` | Management UI | HTML |
+| `backend-data.js` | Server API | Node.js |
+| `data/curator-data.json` | Database | JSON |
+| `data/backups/` | Backups folder | Directory |
+
+---
+
+## ✅ Checklist
+
+### Setup
+- [ ] Run `setup.bat` OR `npm install && node backend-data.js`
+- [ ] Open `http://localhost:3000/data-editor.html`
+- [ ] Add a test curator
+- [ ] Verify data appears in JSON viewer
+
+### Integration
+- [ ] Add `<script src="data-storage.js"></script>` to HTML files
+- [ ] Replace old curator code with `dataStorage.getCuratorsByOrg()`
+- [ ] Test in multiple browser tabs
+- [ ] Verify cross-tab sync works
+
+### Backup
+- [ ] Click "📥 Backup" button
+- [ ] Save JSON file in safe location
+- [ ] Test restore with "📤 Restore" button
+
+---
+
+## 🐛 Troubleshooting
+
+| Problem | Solution |
+|---------|----------|
+| Server won't start | Kill process on port 3001: `netstat -ano \| findstr :3001` |
+| Storage not saving | Check browser console (F12), restart server |
+| Data lost | Restore from `data/backups/` folder |
+| Sync not working | Open 2 tabs, try adding curator in one |
+| Port 3001 in use | Change port in `backend-data.js` line 6 |
+
+---
+
+## 🎨 UI Features
+
+### Data Editor Dashboard
+- **Left:** Curator Manager (add/edit/delete)
+- **Right:** JSON Viewer (view/copy/reload)
+- **Top:** Controls (backup/restore/refresh)
+- **Stats:** Real-time usage info
+
+### Key Buttons
+- 🔄 **Refresh** - Reload all data
+- 📥 **Backup** - Download JSON
+- 📤 **Restore** - Upload JSON
+- ✏️ **Edit** - Change curator name
+- 🗑️ **Delete** - Remove curator
+- 📋 **Copy** - Copy JSON to clipboard
+
+---
+
+## 📞 Support
+
+### Console Debugging
+```javascript
+// Check if loaded
+console.log(window.dataStorage); // Should be DataStorage object
+
+// Get current state
+console.table(dataStorage.getAllData());
+
+// Enable watcher logging
+dataStorage.watch('all', (data) => {
+    console.log('[LIVE UPDATE]', new Date().toLocaleTimeString());
+});
+```
+
+### Check Server
+```bash
+# Is server running?
+curl http://localhost:3001/api/health
+
+# See recent changes
+curl http://localhost:3001/api/data/stats
+```
+
+### Verify Backup
+```bash
+# List all backups
+curl http://localhost:3001/api/backups
+
+# Check file
+type data\curator-data.json
+```
+
+---
+
+## 🚀 Pro Tips
+
+1. **Add to Favorites:** Bookmark `data-editor.html` for quick access
+2. **Batch Operations:** Use API endpoints for bulk operations
+3. **Monitor:** Keep dashboard open to watch real-time changes
+4. **Backup:** Export every day to local storage
+5. **Sync:** Use server for multi-device sync
+6. **Export:** Share curator lists via JSON export
+7. **Automate:** Use API endpoints in scripts
+
+---
+
+## 💾 Backup Locations
+
+```
+Windows:
+  Browser: C:\Users\[User]\AppData\Local\[Browser]\LocalStorage\
+  Server:  d:\Grand Web\data\curator-data.json
+  Backups: d:\Grand Web\data\backups\backup-*.json
+
+Mac/Linux:
+  Browser: ~/.config/[Browser]/LocalStorage/
+  Server:  ./data/curator-data.json
+  Backups: ./data/backups/backup-*.json
+```
+
+---
+
+## 🎁 Bonus: Bulk Operations
+
+### Add Multiple Curators
+```javascript
+const data = [
+    { org: 'EMS', name: 'Officer A' },
+    { org: 'EMS', name: 'Officer B' },
+    { org: 'FIB', name: 'Agent X' },
+    { org: 'LSPD', name: 'Detective Y' }
+];
+
+data.forEach(item => {
+    dataStorage.addCurator(item.org, item.name);
+});
+```
+
+### Export All Data
+```javascript
+// Get everything
+const allData = dataStorage.getAllData();
+
+// Save locally
+const json = JSON.stringify(allData, null, 2);
+localStorage.setItem('backup', json);
+
+// Download
+const blob = new Blob([json], {type: 'application/json'});
+const url = URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.href = url;
+a.download = 'backup.json';
+a.click();
+```
+
+### Clear & Reset
+```javascript
+// WARNING: Irreversible!
+if (confirm('Delete all data?')) {
+    dataStorage.clearAllData();
+}
+```
+
+---
+
+## 📅 Changelog
+
+**v1.0.0** - December 4, 2024
+- ✅ Initial release
+- ✅ Real-time sync
+- ✅ Persistent storage
+- ✅ Backup/restore
+- ✅ REST API
+- ✅ Dashboard UI
+
+---
+
+**Keep this card handy! 📌**
+
+*Save Time: Use examples above, copy & paste into your code*  
+*Stay Safe: Backup before major changes*  
+*Stay Synced: Open dashboard to monitor live changes*

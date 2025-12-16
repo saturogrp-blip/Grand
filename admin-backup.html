@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Grand Interview</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: var(--card-bg);
+            border-radius: 10px;
+            border: 1px solid var(--input-border);
+        }
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--accent);
+        }
+        .admin-header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        .back-link {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all .2s ease;
+        }
+        .back-link:hover {
+            opacity: 0.8;
+        }
+        .admin-section {
+            margin-bottom: 2.5rem;
+            padding: 1.5rem;
+            background: var(--surface);
+            border-radius: 8px;
+            border: 1px solid var(--input-border);
+        }
+        .admin-section h2 {
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+            font-size: 1.3rem;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 0.5rem;
+        }
+        .admin-section h3 {
+            margin-top: 0;
+            color: var(--text);
+            font-size: 1.1rem;
+        }
+        .question-item {
+            display: flex;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+            align-items: flex-start;
+        }
+        .question-item textarea {
+            flex: 1;
+            padding: 0.6rem;
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            background: var(--input-bg);
+            color: var(--input-text);
+            font-family: inherit;
+            font-size: 0.95rem;
+            min-height: 60px;
+            resize: vertical;
+        }
+        .question-item button {
+            padding: 0.6rem 1rem;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all .2s ease;
+            align-self: flex-start;
+            margin-top: 0.1rem;
+        }
+        .question-item button:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        }
+        .add-question-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.7rem 1.2rem;
+            background: #22c55e;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all .2s ease;
+            margin-bottom: 1rem;
+        }
+        .add-question-btn:hover {
+            background: #16a34a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        }
+        .org-selector {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .org-selector select {
+            flex: 1;
+            min-width: 250px;
+        }
+        .org-question-item {
+            display: flex;
+            gap: 0.8rem;
+            margin-bottom: 0.8rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid var(--input-border);
+            align-items: center;
+        }
+        .org-question-text {
+            flex: 1;
+            font-size: 0.95rem;
+            color: var(--text);
+            line-height: 1.4;
+        }
+        .org-add-btn {
+            padding: 0.5rem 0.8rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: all .2s ease;
+            font-size: 0.9rem;
+        }
+        .org-add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(11, 102, 194, 0.3);
+        }
+        .org-questions-display {
+            display: none;
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: var(--input-bg);
+            border-radius: 8px;
+            border: 1px solid var(--input-border);
+        }
+        .org-questions-display.active {
+            display: block;
+        }
+        .org-questions-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 1rem 0;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--input-border);
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        .btn-save, .btn-reset, .btn-export, .btn-import, .add-question-btn {
+            height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 1.1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all .15s ease;
+        }
+        .action-buttons button + button { margin-left: 0; }
+        .btn-save {
+            background: var(--accent);
+            color: white;
+        }
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(11, 102, 194, 0.3);
+        }
+        .btn-reset {
+            background: #6c757d;
+            color: white;
+        }
+        .btn-reset:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+        .btn-export, .btn-import {
+            background: #fd7e14;
+            color: white;
+        }
+        .btn-export:hover, .btn-import:hover {
+            background: #e67e22;
+            transform: translateY(-2px);
+        }
+        .message {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            display: none;
+        }
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        #fileInput {
+            display: none;
+        }
+        .question-count {
+            font-size: 0.9rem;
+            color: var(--muted);
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+<!-- Top navigation (match main site) -->
+<header class="top-nav">
+    <div class="top-nav-inner">
+        <div class="brand">
+            <div class="brand-badge">GI</div>
+            <div class="brand-text"><div class="brand-title">Grand Interview</div><div class="brand-sub">Admin Panel</div></div>
+        </div>
+        <nav class="top-links">
+            <button class="nav-pill">Generator</button>
+            <button class="nav-pill active">Admin</button>
+            <button class="nav-pill">Analytics</button>
+        </nav>
+        <div class="top-actions">
+            <button id="themeToggleTop" class="icon-btn" title="Toggle theme">Dark</button>
+        </div>
+    </div>
+</header>
+
+<div class="admin-container">
+    <div class="admin-header">
+        <h1>Admin Panel</h1>
+        <a href="index.html" class="back-link">← Back to Interview</a>
+    </div>
+
+    <div id="message" class="message"></div>
+
+    <div class="admin-section">
+        <h2>Curator Management</h2>
+        <p style="color: var(--muted); font-size: 0.95rem;">Manage curators and the senior curator across all organizations.</p>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+            <div style="padding: 1rem; background: var(--input-bg); border-radius: 8px; border: 1px solid var(--input-border);">
+                <label style="display: block; margin-bottom: 0.5rem; color: var(--text); font-weight: 600;">Senior Curator</label>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="text" id="seniorCuratorInput" placeholder="Senior Curator name" style="flex: 1; padding: 0.6rem; border: 1px solid var(--input-border); border-radius: 6px; background: var(--input-bg); color: var(--input-text);">
+                    <button onclick="updateSeniorCurator()" style="padding: 0.6rem 1rem; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all .2s ease;">Update</button>
+                </div>
+                <div id="seniorCuratorDisplay" style="margin-top: 0.8rem; font-size: 0.95rem; color: var(--muted);"></div>
+            </div>
+
+            <div style="padding: 1rem; background: var(--input-bg); border-radius: 8px; border: 1px solid var(--input-border);">
+                <label style="display: block; margin-bottom: 0.5rem; color: var(--text); font-weight: 600;">Organization</label>
+                <select id="curatorOrgSelect" onchange="loadCuratorsForOrg()" style="width: 100%; padding: 0.6rem; border: 1px solid var(--input-border); border-radius: 6px; background: var(--input-bg); color: var(--input-text);">
+                    <option value="">-- Select an Organization --</option>
+                    <option value="FIB">Federal Investigation Bureau (FIB)</option>
+                    <option value="LSPD">Los Santos Police Department (LSPD)</option>
+                    <option value="SAHP">San Andreas Highway Patrol (SAHP)</option>
+                    <option value="GOV">Government (GOV)</option>
+                    <option value="LI">Lifeinvaider (LI)</option>
+                    <option value="NG">National Guard (NG)</option>
+                    <option value="EMS">Emergency Medical Services (EMS)</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="curatorListContainer" style="display: none; padding: 1rem; background: var(--input-bg); border-radius: 8px; border: 1px solid var(--input-border);">
+            <h3 id="curatorOrgName" style="margin-top: 0; margin-bottom: 1rem; color: var(--text);"></h3>
+            
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                <input type="text" id="newCuratorInput" placeholder="Enter curator name..." style="flex: 1; padding: 0.6rem; border: 1px solid var(--input-border); border-radius: 6px; background: var(--input-bg); color: var(--input-text);">
+                <button onclick="addNewCurator()" style="padding: 0.6rem 1rem; background: #22c55e; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all .2s ease;">+ Add</button>
+            </div>
+
+            <div id="curatorsList" style="max-height: 300px; overflow-y: auto; padding: 0.5rem 0;"></div>
+            <div id="curatorCount" style="font-size: 0.9rem; color: var(--muted); margin-top: 0.8rem;"></div>
+        </div>
+    </div>
+
+    <div class="admin-section">
+        <h2>Mandatory Questions Management</h2>
+        <p style="color: var(--muted); font-size: 0.95rem;">These questions will appear at the beginning of every generated set.</p>
+        
+        <button class="add-question-btn" onclick="addQuestionField()">+ Add Question</button>
+        
+        <div id="questionsContainer"></div>
+        <div class="question-count" id="questionCount"></div>
+    </div>
+
+    <div class="admin-section">
+        <h2>Import Questions from Organization Banks</h2>
+        <p style="color: var(--muted); font-size: 0.95rem;">Select an organization to preview and add questions to mandatory list.</p>
+        
+        <div class="org-selector">
+            <select id="orgSelect" onchange="loadOrgQuestions()">
+                <option value="">-- Select an Organization --</option>
+                <option value="FIB">Federal Investigation Bureau (FIB)</option>
+                <option value="LSPD">Los Santos Police Department (LSPD)</option>
+                <option value="SAHP">San Andreas Highway Patrol (SAHP)</option>
+                <option value="GOV">Government (GOV)</option>
+                <option value="LI">Lifeinvaider (LI)</option>
+                <option value="NG">National Guard (NG)</option>
+                <option value="EMS">Emergency Medical Services (EMS)</option>
+            </select>
+            <button class="add-question-btn" onclick="showAddNewToBank()" id="addNewBtn" style="display: none; margin-bottom: 0;">+ Add New Question</button>
+            <div id="addNewBankContainer" style="display:none; width:100%; margin-top:10px;"></div>
+        </div>
+        
+        <div id="orgQuestionsDisplay" class="org-questions-display">
+            <h3>Questions from <span id="orgName"></span></h3>
+            <div class="org-questions-list" id="orgQuestionsList"></div>
+            <div class="question-count" id="orgQuestionCount"></div>
+        </div>
+    </div>
+
+    <div class="action-buttons">
+        <button class="btn-save" onclick="saveQuestions()">Save Questions</button>
+        <button class="btn-reset" onclick="resetToDefault()">Reset Questions</button>
+        <button class="btn-export" onclick="exportCurators()">Export Curators</button>
+        <button class="btn-import" onclick="document.getElementById('curatorFileInput').click()">Import Curators</button>
+        <button class="btn-reset" onclick="resetCuratorsToDefault()">Reset Curators</button>
+        <input type="file" id="fileInput" accept=".json" onchange="importQuestions(event)">
+        <input type="file" id="curatorFileInput" accept=".json" onchange="importCurators(event)">
+    </div>
+</div>
+
+<!-- Load all question bank scripts needed for admin panel -->
+<script src="curator-db.js"></script>
+<script src="FIB.js"></script>
+<script src="LSPD.js"></script>
+<script src="SAHP.js"></script>
+<script src="GOV.js"></script>
+<script src="LI.js"></script>
+<script src="NG.js"></script>
+<script src="EMS.js"></script>
+<script src="mandatory.js"></script>
+
+<script>
+    // ==================== CURATOR MANAGEMENT ====================
+    
+    /**
+     * Load and display curators for the selected organization
+     */
+    function loadCuratorsForOrg() {
+        const org = document.getElementById('curatorOrgSelect').value;
+        const container = document.getElementById('curatorListContainer');
+        
+        if (!org) {
+            container.style.display = 'none';
+            return;
+        }
+
+        container.style.display = 'block';
+        document.getElementById('newCuratorInput').value = '';
+        renderCuratorsList(org);
+    }
+
+    /**
+     * Render the list of curators for selected organization
+     */
+    function renderCuratorsList(org) {
+        const curators = window.CuratorDB.getCurators(org);
+        const listContainer = document.getElementById('curatorsList');
+        const orgNames = {
+            FIB: 'Federal Investigation Bureau (FIB)',
+            LSPD: 'Los Santos Police Department (LSPD)',
+            SAHP: 'San Andreas Highway Patrol (SAHP)',
+            GOV: 'Government (GOV)',
+            LI: 'Lifeinvaider (LI)',
+            NG: 'National Guard (NG)',
+            EMS: 'Emergency Medical Services (EMS)'
+        };
+
+        document.getElementById('curatorOrgName').textContent = `Curators for ${orgNames[org] || org}`;
+        listContainer.innerHTML = '';
+
+        if (curators.length === 0) {
+            listContainer.innerHTML = '<p style="color: var(--muted); font-style: italic;">No curators assigned yet.</p>';
+            document.getElementById('curatorCount').textContent = 'Total: 0 curator(s)';
+            return;
+        }
+
+        curators.forEach((curator, idx) => {
+            const div = document.createElement('div');
+            div.className = 'curator-item';
+            div.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 0.6rem; margin-bottom: 0.5rem; background: var(--surface); border-radius: 6px; border: 1px solid var(--input-border);';
+
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = curator;
+            nameSpan.style.cssText = 'flex: 1; color: var(--text); font-weight: 500;';
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = '✕ Remove';
+            deleteBtn.style.cssText = 'padding: 0.4rem 0.8rem; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: all .2s ease;';
+            deleteBtn.onmouseover = () => { deleteBtn.style.background = '#c82333'; };
+            deleteBtn.onmouseout = () => { deleteBtn.style.background = '#dc3545'; };
+            deleteBtn.onclick = () => removeCuratorFromOrg(org, curator);
+
+            div.appendChild(nameSpan);
+            div.appendChild(deleteBtn);
+            listContainer.appendChild(div);
+        });
+
+        document.getElementById('curatorCount').textContent = `Total: ${curators.length} curator(s)`;
+    }
+
+    /**
+     * Add a new curator to the selected organization
+     */
+    function addNewCurator() {
+        const org = document.getElementById('curatorOrgSelect').value;
+        const input = document.getElementById('newCuratorInput');
+        const name = (input.value || '').trim();
+
+        if (!org) {
+            showMessage('Please select an organization first', 'error');
+            return;
+        }
+
+        if (!name) {
+            showMessage('Please enter a curator name', 'error');
+            return;
+        }
+
+        if (window.CuratorDB.addCurator(org, name)) {
+            showMessage(`Curator "${name}" added successfully`, 'success');
+            input.value = '';
+            renderCuratorsList(org);
+        } else {
+            showMessage('Could not add curator. It may already exist.', 'error');
+        }
+    }
+
+    /**
+     * Remove a curator from the organization
+     */
+    function removeCuratorFromOrg(org, curatorName) {
+        if (!confirm(`Remove "${curatorName}" as curator?`)) return;
+
+        if (window.CuratorDB.removeCurator(org, curatorName)) {
+            showMessage(`Curator "${curatorName}" removed successfully`, 'success');
+            renderCuratorsList(org);
+        } else {
+            showMessage('Could not remove curator', 'error');
+        }
+    }
+
+    /**
+     * Update the senior curator
+     */
+    function updateSeniorCurator() {
+        const input = document.getElementById('seniorCuratorInput');
+        const name = (input.value || '').trim();
+
+        if (!name) {
+            showMessage('Please enter a senior curator name', 'error');
+            return;
+        }
+
+        if (window.CuratorDB.setSeniorCurator(name)) {
+            showMessage(`Senior Curator updated to "${name}"`, 'success');
+            displaySeniorCurator();
+        } else {
+            showMessage('Could not update senior curator', 'error');
+        }
+    }
+
+    /**
+     * Display the current senior curator
+     */
+    function displaySeniorCurator() {
+        const senior = window.CuratorDB.getSeniorCurator();
+        document.getElementById('seniorCuratorInput').value = senior;
+        document.getElementById('seniorCuratorDisplay').textContent = `Current: ${senior}`;
+    }
+
+    /**
+     * Listen for curator database changes from other tabs
+     */
+    window.addEventListener('curatorDbChanged', (e) => {
+        console.log('Curator database updated from another source');
+        const org = document.getElementById('curatorOrgSelect').value;
+        if (org) {
+            renderCuratorsList(org);
+        }
+        displaySeniorCurator();
+    });
+
+    /**
+     * Listen for storage changes (sync across tabs)
+     */
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'curators_database_v2') {
+            console.log('Curator database changed in another tab, syncing...');
+            const org = document.getElementById('curatorOrgSelect').value;
+            if (org) {
+                renderCuratorsList(org);
+            }
+            displaySeniorCurator();
+        }
+    });
+
+    // ==================== END CURATOR MANAGEMENT ====================
+
+    // Load mandatory questions from localStorage or default
+    function loadQuestions() {
+        const stored = localStorage.getItem('mandatory_questions_v1');
+        return stored ? JSON.parse(stored) : window.MANDATORY_QUESTIONS || getDefaultQuestions();
+    }
+
+    function getDefaultQuestions() {
+        return [
+            "Why do you want to be Leader of this Organisation?",
+            "What is the minimum term of leadership required to avoid removal from the post?",
+            "What happens if the leader leaves their post without serious reason?",
+            "Is a leader allowed to use the organization's warehouse for personal purposes?",
+            "Does a leader have the right to take a 24-hour faction freeze upon appointment?",
+            "How many 9th-rank deputies can the leader of state organizations have?",
+            "Does a leader have the right to dismiss employees if they lose confidence in them, with/without curator approval?",
+            "How long of a freeze can a leader take once per term with senior curator approval?",
+            "How often must a leader host a global event?",
+            "What are your responsibilites as a leader?",
+            "Is there any OOC responsibilites you need to follow?",
+            "As a leader of an organizations are you prohibited from any OOC rules?"
+        ];
+    }
+
+    function getOrgBankData(org) {
+        // Access the question bank from window.BANKS loaded by the org scripts
+        // Also include any admin-added overrides stored in localStorage under a per-org key
+        const base = (window.BANKS && window.BANKS[org]) ? window.BANKS[org].slice() : [];
+        try{
+            const overridesKey = `org_bank_overrides_v1::${org}`;
+            const deletionsKey = `org_bank_deletions_v1::${org}`;
+            const overrides = JSON.parse(localStorage.getItem(overridesKey)) || [];
+            const deletions = JSON.parse(localStorage.getItem(deletionsKey)) || [];
+            // Merge base + overrides and filter out any deleted questions
+            const merged = base.concat(overrides).filter(q => !deletions.includes(q));
+            return merged;
+        }catch(e){
+            return base;
+        }
+    }
+
+    function loadOrgQuestions() {
+        const org = document.getElementById('orgSelect').value;
+        if (!org) {
+            document.getElementById('orgQuestionsDisplay').classList.remove('active');
+            document.getElementById('addNewBtn').style.display = 'none';
+            return;
+        }
+
+        const questions = getOrgBankData(org);
+        if (questions.length === 0) {
+            showMessage('No questions found for this organization. Make sure the bank file is loaded.', 'error');
+            document.getElementById('orgQuestionsDisplay').classList.remove('active');
+            return;
+        }
+
+        const orgName = document.getElementById('orgSelect').options[document.getElementById('orgSelect').selectedIndex].text;
+        document.getElementById('orgName').textContent = orgName;
+        document.getElementById('orgQuestionCount').textContent = `Total: ${questions.length} question(s) in bank`;
+        
+        const container = document.getElementById('orgQuestionsList');
+        container.innerHTML = '';
+
+        questions.forEach((q, idx) => {
+            const div = document.createElement('div');
+            div.className = 'org-question-item';
+
+            const textDiv = document.createElement('div');
+            textDiv.className = 'org-question-text';
+            textDiv.textContent = q;
+
+            // Edit button - opens inline editor and lets you save edited question to mandatory list
+            const editBtn = document.createElement('button');
+            editBtn.className = 'org-add-btn';
+            editBtn.textContent = 'Edit';
+            editBtn.onclick = () => editOrgQuestion(org, idx, editBtn);
+
+            // Delete button - allow admin to mark this question as deleted (persisted)
+            const delBtn = document.createElement('button');
+            delBtn.className = 'org-del-btn';
+            delBtn.textContent = 'Delete';
+            delBtn.style.marginLeft = '.4rem';
+            delBtn.style.background = '#dc3545';
+            delBtn.style.color = '#fff';
+            delBtn.style.border = 'none';
+            delBtn.style.borderRadius = '4px';
+            delBtn.style.padding = '.45rem .7rem';
+            delBtn.onclick = () => deleteOrgQuestion(org, q);
+
+            div.appendChild(textDiv);
+            div.appendChild(editBtn);
+            div.appendChild(delBtn);
+            container.appendChild(div);
+        });
+
+        document.getElementById('orgQuestionsDisplay').classList.add('active');
+        document.getElementById('addNewBtn').style.display = 'inline-flex';
+    }
+
+    function addSingleOrgQuestion(org, idx) {
+        const questions = getOrgBankData(org);
+        if (questions[idx]) {
+            const currentMandatory = loadQuestions();
+            if (!currentMandatory.includes(questions[idx])) {
+                currentMandatory.push(questions[idx]);
+                localStorage.setItem('mandatory_questions_v1', JSON.stringify(currentMandatory));
+                window.MANDATORY_QUESTIONS = currentMandatory;
+                renderQuestions();
+                showMessage('Question added to mandatory list', 'success');
+            } else {
+                showMessage('This question is already in the mandatory list', 'error');
+            }
+        }
+    }
+
+    // Show an inline input to add a new question to the selected organization's bank (persists to overrides)
+    function showAddNewToBank(){
+        const org = document.getElementById('orgSelect').value;
+        if(!org) {
+            showMessage('Please select an organization first', 'error');
+            return;
+        }
+        const container = document.getElementById('addNewBankContainer');
+        container.innerHTML = '';
+        container.style.display = 'block';
+
+        const ta = document.createElement('textarea');
+        ta.placeholder = 'Enter new question to add to organization bank...';
+        ta.style.width = '100%';
+        ta.style.minHeight = '60px';
+
+        const saveBtn = document.createElement('button');
+        saveBtn.className = 'add-question-btn';
+        saveBtn.textContent = 'Save to Bank';
+        saveBtn.style.marginTop = '8px';
+        saveBtn.onclick = () => addNewToBankSave(org, ta.value);
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'btn-reset';
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.style.marginLeft = '8px';
+        cancelBtn.onclick = () => cancelAddNewToBank();
+
+        container.appendChild(ta);
+        container.appendChild(saveBtn);
+        container.appendChild(cancelBtn);
+    }
+
+    function cancelAddNewToBank(){
+        const container = document.getElementById('addNewBankContainer');
+        container.innerHTML = '';
+        container.style.display = 'none';
+    }
+
+    function addNewToBankSave(org, text){
+        const trimmed = (text || '').trim();
+        if(!trimmed){
+            showMessage('Please enter a question before saving', 'error');
+            return;
+        }
+        try{
+            const overridesKey = `org_bank_overrides_v1::${org}`;
+            const deletionsKey = `org_bank_deletions_v1::${org}`;
+            const overrides = JSON.parse(localStorage.getItem(overridesKey)) || [];
+            const deletions = JSON.parse(localStorage.getItem(deletionsKey)) || [];
+            // Prevent duplicates across base bank, overrides, and deletions
+            const base = (window.BANKS && window.BANKS[org]) ? window.BANKS[org] : [];
+            if (base.includes(trimmed) || overrides.includes(trimmed)){
+                showMessage('This question already exists in the organization bank', 'error');
+                return;
+            }
+            // If this was previously deleted, remove from deletions
+            const dIdx = deletions.indexOf(trimmed);
+            if(dIdx !== -1){
+                deletions.splice(dIdx,1);
+                localStorage.setItem(deletionsKey, JSON.stringify(deletions));
+            }
+            overrides.push(trimmed);
+            localStorage.setItem(overridesKey, JSON.stringify(overrides));
+            showMessage('Question added to organization bank (saved to localStorage)', 'success');
+            cancelAddNewToBank();
+            loadOrgQuestions();
+        }catch(e){
+            showMessage('Could not save to organization bank: ' + e.message, 'error');
+        }
+    }
+
+    // Mark a question as deleted for an organization (persisted in localStorage deletions list)
+    function deleteOrgQuestion(org, questionText){
+        if(!confirm('Are you sure you want to delete this question from the displayed bank? (This hides it locally)')) return;
+        try{
+            const deletionsKey = `org_bank_deletions_v1::${org}`;
+            const deletions = JSON.parse(localStorage.getItem(deletionsKey)) || [];
+            if(!deletions.includes(questionText)){
+                deletions.push(questionText);
+                localStorage.setItem(deletionsKey, JSON.stringify(deletions));
+            }
+            showMessage('Question deleted from organization bank (local)', 'success');
+            loadOrgQuestions();
+        }catch(e){
+            showMessage('Could not delete question: ' + e.message, 'error');
+        }
+    }
+
+    function renderQuestions() {
+        const questions = loadQuestions();
+        const container = document.getElementById('questionsContainer');
+        container.innerHTML = '';
+
+        questions.forEach((q, idx) => {
+            const div = document.createElement('div');
+            div.className = 'question-item';
+            const textarea = document.createElement('textarea');
+            textarea.placeholder = 'Enter mandatory question...';
+            textarea.value = q;
+            
+            const btn = document.createElement('button');
+            btn.textContent = 'Delete';
+            btn.onclick = () => deleteQuestion(idx);
+            
+            div.appendChild(textarea);
+            div.appendChild(btn);
+            container.appendChild(div);
+        });
+
+        document.getElementById('questionCount').textContent = `Total: ${questions.length} question(s)`;
+    }
+
+    /* Inline edit helpers for org questions */
+    function editOrgQuestion(org, idx, btn){
+        const container = btn.parentElement;
+        const textDiv = container.querySelector('.org-question-text');
+        const original = textDiv.textContent;
+
+        // Hide the static text and the edit button
+        textDiv.style.display = 'none';
+        btn.style.display = 'none';
+
+        // Create editor textarea
+        const ta = document.createElement('textarea');
+        ta.className = 'org-edit-ta';
+        ta.value = original;
+        ta.style.width = '100%';
+        ta.style.minHeight = '60px';
+        ta.style.marginRight = '.6rem';
+
+        // Create save and cancel buttons
+        const saveBtn = document.createElement('button');
+        saveBtn.className = 'org-add-btn org-save-btn';
+        saveBtn.textContent = 'Save';
+        saveBtn.onclick = () => saveEditedOrgQuestion(org, idx, ta.value, container, original);
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'org-cancel-btn';
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.style.marginLeft = '.4rem';
+        cancelBtn.style.padding = '.45rem .7rem';
+        cancelBtn.style.background = '#6c757d';
+        cancelBtn.style.color = '#fff';
+        cancelBtn.style.border = 'none';
+        cancelBtn.style.borderRadius = '4px';
+        cancelBtn.onclick = () => cancelEditOrgQuestion(container, original);
+
+        // Insert editor and buttons
+        container.insertBefore(ta, textDiv);
+        container.appendChild(saveBtn);
+        container.appendChild(cancelBtn);
+    }
+
+    function saveEditedOrgQuestion(org, idx, editedText, container, original){
+        const trimmed = (editedText || '').trim();
+
+        // If admin saved an empty value, treat this as a deletion request
+        if(!trimmed){
+            // mark original as deleted
+            deleteOrgQuestion(org, original);
+            // cleanup editor UI
+            const taEmpty = container.querySelector('textarea.org-edit-ta'); if(taEmpty) taEmpty.remove();
+            const saveEmpty = container.querySelector('.org-save-btn'); if(saveEmpty) saveEmpty.remove();
+            const cancelEmpty = container.querySelector('.org-cancel-btn'); if(cancelEmpty) cancelEmpty.remove();
+            const textDivEmpty = container.querySelector('.org-question-text'); if(textDivEmpty) textDivEmpty.style.display = 'block';
+            const editBtnEmpty = container.querySelector('.org-add-btn'); if(editBtnEmpty) editBtnEmpty.style.display = 'inline-flex';
+            return;
+        }
+
+        // Save edited question into the organization's bank overrides (persisted in localStorage)
+        try{
+            const overridesKey = `org_bank_overrides_v1::${org}`;
+            const deletionsKey = `org_bank_deletions_v1::${org}`;
+            const overrides = JSON.parse(localStorage.getItem(overridesKey)) || [];
+            const deletions = JSON.parse(localStorage.getItem(deletionsKey)) || [];
+            const base = (window.BANKS && window.BANKS[org]) ? window.BANKS[org] : [];
+
+            // prevent duplicate in overrides or base
+            if(overrides.includes(trimmed) || base.includes(trimmed)){
+                showMessage('This question already exists in the organization bank', 'error');
+            } else {
+                // if it was previously deleted, remove deletion marker
+                const dIdx = deletions.indexOf(trimmed);
+                if(dIdx !== -1){
+                    deletions.splice(dIdx,1);
+                    localStorage.setItem(deletionsKey, JSON.stringify(deletions));
+                }
+                overrides.push(trimmed);
+                localStorage.setItem(overridesKey, JSON.stringify(overrides));
+                showMessage('Question added to organization bank (saved to localStorage)', 'success');
+                // refresh the org question list to show the newly added question
+                loadOrgQuestions();
+            }
+        }catch(e){
+            showMessage('Could not save to organization bank: ' + e.message, 'error');
+        }
+
+        // cleanup editor UI
+        const ta = container.querySelector('textarea.org-edit-ta'); if(ta) ta.remove();
+        const save = container.querySelector('.org-save-btn'); if(save) save.remove();
+        const cancel = container.querySelector('.org-cancel-btn'); if(cancel) cancel.remove();
+        const textDiv = container.querySelector('.org-question-text'); if(textDiv) textDiv.style.display = 'block';
+        const editBtn = container.querySelector('.org-add-btn'); if(editBtn) editBtn.style.display = 'inline-flex';
+    }
+
+    function cancelEditOrgQuestion(container, original){
+        const ta = container.querySelector('textarea.org-edit-ta'); if(ta) ta.remove();
+        const save = container.querySelector('.org-save-btn'); if(save) save.remove();
+        const cancel = container.querySelector('.org-cancel-btn'); if(cancel) cancel.remove();
+        const textDiv = container.querySelector('.org-question-text'); if(textDiv) textDiv.style.display = 'block';
+        const editBtn = container.querySelector('.org-add-btn'); if(editBtn) editBtn.style.display = 'inline-flex';
+    }
+
+    function addQuestionField() {
+        const questions = loadQuestions();
+        questions.push('');
+        localStorage.setItem('mandatory_questions_v1', JSON.stringify(questions));
+        renderQuestions();
+    }
+
+    function deleteQuestion(idx) {
+        const questions = loadQuestions();
+        questions.splice(idx, 1);
+        localStorage.setItem('mandatory_questions_v1', JSON.stringify(questions));
+        renderQuestions();
+        showMessage('Question deleted', 'success');
+    }
+
+    function saveQuestions() {
+        const textareas = document.querySelectorAll('#questionsContainer textarea');
+        const questions = Array.from(textareas).map(ta => ta.value.trim()).filter(q => q.length > 0);
+
+        if (questions.length === 0) {
+            showMessage('Please add at least one question', 'error');
+            return;
+        }
+
+        localStorage.setItem('mandatory_questions_v1', JSON.stringify(questions));
+        window.MANDATORY_QUESTIONS = questions;
+        showMessage('Questions saved successfully! Changes will apply to next generation.', 'success');
+    }
+
+    function resetToDefault() {
+        if (confirm('Are you sure you want to reset to default questions?')) {
+            const defaults = getDefaultQuestions();
+            localStorage.setItem('mandatory_questions_v1', JSON.stringify(defaults));
+            window.MANDATORY_QUESTIONS = defaults;
+            renderQuestions();
+            showMessage('Reset to default questions', 'success');
+        }
+    }
+
+    function exportQuestions() {
+        const questions = loadQuestions();
+        const dataStr = JSON.stringify(questions, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `mandatory_questions_${new Date().toISOString().split('T')[0]}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+        showMessage('Questions exported successfully', 'success');
+    }
+
+    function importQuestions(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const questions = JSON.parse(e.target.result);
+                if (!Array.isArray(questions)) {
+                    showMessage('Invalid format. Please upload a valid JSON file.', 'error');
+                    return;
+                }
+                localStorage.setItem('mandatory_questions_v1', JSON.stringify(questions));
+                window.MANDATORY_QUESTIONS = questions;
+                renderQuestions();
+                showMessage('Questions imported successfully', 'success');
+            } catch (err) {
+                showMessage('Error parsing JSON file: ' + err.message, 'error');
+            }
+        };
+        reader.readAsText(file);
+        event.target.value = '';
+    }
+
+    function showMessage(text, type) {
+        const msgEl = document.getElementById('message');
+        msgEl.textContent = text;
+        msgEl.className = 'message ' + type;
+        setTimeout(() => {
+            msgEl.className = 'message';
+        }, 4000);
+    }
+
+    // Initialize on page load
+    window.addEventListener('load', () => {
+        renderQuestions();
+        displaySeniorCurator();
+        // Apply theme from main page
+        const theme = localStorage.getItem('grand_theme') || 'light';
+        if (theme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+    });
+
+    // Sync theme toggle with main page
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'grand_theme') {
+            if (e.newValue === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+        }
+    });
+
+    // Wire the top theme toggle to update localStorage so it syncs across pages
+    (function(){
+        const topToggle = document.getElementById('themeToggleTop');
+        function applyText(t){ if(topToggle) topToggle.textContent = t === 'dark' ? 'Light' : 'Dark'; }
+        const cur = localStorage.getItem('grand_theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        applyText(cur);
+        if(topToggle){
+            topToggle.addEventListener('click', ()=>{
+                const next = (localStorage.getItem('grand_theme') === 'dark') ? 'light' : 'dark';
+                try{ localStorage.setItem('grand_theme', next); }catch(e){}
+                if(next === 'dark') document.documentElement.setAttribute('data-theme','dark'); else document.documentElement.removeAttribute('data-theme');
+                applyText(next);
+            });
+        }
+    })();
+
+    // ==================== CURATOR EXPORT/IMPORT ====================
+
+    /**
+     * Export curators to JSON file
+     */
+    function exportCurators() {
+        try {
+            const data = window.CuratorDB.getAllCurators();
+            const jsonStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `curators_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+            showMessage('Curators exported successfully', 'success');
+        } catch (e) {
+            showMessage('Error exporting curators: ' + e.message, 'error');
+        }
+    }
+
+    /**
+     * Import curators from JSON file
+     */
+    function importCurators(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const jsonStr = e.target.result;
+                if (window.CuratorDB.importFromJSON(jsonStr)) {
+                    displaySeniorCurator();
+                    const org = document.getElementById('curatorOrgSelect').value;
+                    if (org) {
+                        renderCuratorsList(org);
+                    }
+                    showMessage('Curators imported successfully', 'success');
+                } else {
+                    showMessage('Failed to import curators', 'error');
+                }
+            } catch (err) {
+                showMessage('Error parsing JSON file: ' + err.message, 'error');
+            }
+        };
+        reader.readAsText(file);
+        event.target.value = '';
+    }
+
+    /**
+     * Reset curators to default values
+     */
+    function resetCuratorsToDefault() {
+        if (!confirm('Reset all curators to default values?')) return;
+
+        if (window.CuratorDB.resetToDefaults()) {
+            displaySeniorCurator();
+            const org = document.getElementById('curatorOrgSelect').value;
+            if (org) {
+                renderCuratorsList(org);
+            }
+            showMessage('Curators reset to defaults', 'success');
+        } else {
+            showMessage('Failed to reset curators', 'error');
+        }
+    }
+
+</script>
+</body>
+</html>
